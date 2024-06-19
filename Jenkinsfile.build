@@ -13,7 +13,7 @@ pipeline {
 
     post {
         success {
-            build job: 'deploy-pipeline'
+            build job: '2'
         }
     }
 }
