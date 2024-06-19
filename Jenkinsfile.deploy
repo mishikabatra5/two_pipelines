@@ -1,11 +1,24 @@
 pipeline {
     agent any
-
+    
+    environment {
+        dockerImage = 'my-docker-image:latest' // Name and tag of your Docker image
+        awsInstances = ['54.92.163.41', '50.19.149.58'] // List of IP addresses or hostnames of your AWS instances
+        dockerPort = '80' // Port to expose on the Docker container
+    }
+    
     stages {
         stage('Deploy Docker Image') {
             steps {
                 script {
-                    docker.image('my-docker-image').run('-d -p 80:80')
+                    awsInstances.each { instance ->
+                        // Pull Docker image
+                        docker.image(dockerImage).pull()
+                        
+                        // Run Docker container on each instance using SSH
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@${instance} 'docker pull ${dockerImage}'"
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@${instance} 'docker run -d -p ${dockerPort}:80 ${dockerImage}'"
+                    }
                 }
             }
         }
