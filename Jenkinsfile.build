@@ -1,11 +1,32 @@
 pipeline {
     agent any
 
+    environment {
+        // Define Docker Hub credentials
+        DOCKER_HUB_CREDENTIALS = credentials('a782c2bc-47ea-4929-b865-3e8488b8e134')
+        // Define Docker image tag
+        IMAGE_TAG = "my-docker-image:latest"
+        // Define Dockerfile path
+        DOCKERFILE_PATH = 'Dockerfile'
+    }
+
     stages {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build('my-docker-image', '-f Dockerfile .')
+                    // Build the Docker image
+                    docker.build(IMAGE_TAG, "--file ${DOCKERFILE_PATH} .")
+                }
+            }
+        }
+        
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    // Authenticate and push the Docker image to Docker Hub
+                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
+                        docker.image(IMAGE_TAG).push()
+                    }
                 }
             }
         }
@@ -13,7 +34,8 @@ pipeline {
 
     post {
         success {
-            build job: '2'
+            // Trigger deployment pipeline on success
+            build job: 2
         }
     }
 }
