@@ -2,11 +2,10 @@ pipeline {
     agent any
 
     environment {
-        // Define Docker Hub credentials
-        DOCKER_HUB_CREDENTIALS = 'a782c2bc-47ea-4929-b865-3e8488b8e134'
+        // Define Docker Hub credentials - ensure this matches your Jenkins credentials ID
+        DOCKER_HUB_CREDENTIALS = credentials('a782c2bc-47ea-4929-b865-3e8488b8e134')
         // Define Docker image tag
-        IMAGE_TAG = "pipeline:latest"
-        DOCKER_HUB = mishikabatra/pipeline:latest
+        IMAGE_TAG = "mishikabatra/pipeline:latest"
         // Define Dockerfile path
         DOCKERFILE_PATH = 'Dockerfile'
     }
@@ -25,7 +24,7 @@ pipeline {
             steps {
                 script {
                     // Authenticate and push the Docker image to Docker Hub
-                    docker.withRegistry('https://registry.hub.docker.com/', DOCKER_HUB_CREDENTIALS) {
+                    docker.withRegistry(''https://registry.hub.docker.com/'', DOCKER_HUB_CREDENTIALS) {
                         docker.image(IMAGE_TAG).push()
                     }
                 }
