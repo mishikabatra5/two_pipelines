@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Define Docker Hub credentials - ensure this matches your Jenkins credentials ID
-        DOCKER_HUB_CREDENTIALS = credentials('a782c2bc-47ea-4929-b865-3e8488b8e134')
+        DOCKER_HUB_CREDENTIALS = 'a782c2bc-47ea-4929-b865-3e8488b8e134'
         // Define Docker image tag
         IMAGE_TAG = "mishikabatra/pipeline:latest"
         // Define Dockerfile path
