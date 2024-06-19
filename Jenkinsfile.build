@@ -35,7 +35,7 @@ pipeline {
     post {
         success {
             // Trigger deployment pipeline on success
-            build job: 2
+            build job: '2'
         }
     }
 }
