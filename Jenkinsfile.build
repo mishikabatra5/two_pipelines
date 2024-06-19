@@ -11,9 +11,9 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            build job: '2'
-        }
-    }
-}
+//    post {
+//        success {
+//            build job: '2'
+//        }
+//    }
+//}
