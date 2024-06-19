@@ -5,7 +5,7 @@ pipeline {
         stage('Deploy Docker Image') {
             steps {
                 script {
-                    docker.image('my-docker-image:latest').run('-d -p 80:80')
+                    docker.image('my-docker-image').run('-d -p 80:80')
                 }
             }
         }
