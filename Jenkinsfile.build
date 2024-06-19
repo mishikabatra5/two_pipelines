@@ -12,7 +12,7 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                    docker.withRegistry('https://registry.hub.docker.com', 'a782c2bc-47ea-4929-b865-3e8488b8e134') {
                         docker.image("mishikabatra/pipeline:latest").push()
                     }
                 }
