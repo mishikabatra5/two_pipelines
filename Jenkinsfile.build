@@ -24,7 +24,7 @@ pipeline {
             steps {
                 script {
                     // Authenticate and push the Docker image to Docker Hub
-                    docker.withRegistry('https://mishikabatra/pipeline', DOCKER_HUB_CREDENTIALS) {
+                    docker.withRegistry('https:/mishikabatra/pipeline', DOCKER_HUB_CREDENTIALS) {
                         docker.image(IMAGE_TAG).push()
                     }
                 }
