@@ -2,28 +2,24 @@ pipeline {
     agent any
 
     environment {
-        // Define Docker Hub credentials
-        DOCKER_HUB_CREDENTIALS = credentials('a782c2bc-47ea-4929-b865-3e8488b8e134')
-        // Define Docker image tag
-        IMAGE_TAG = "my-docker-image:latest"
+        DOCKER_HUB_CREDENTIALS = 'a782c2bc-47ea-4929-b865-3e8488b8e134'
+        IMAGE_TAG = "mishikabatra/pipeline:latest"
     }
 
     stages {
         stage('Pull Docker Image from Docker Hub') {
             steps {
                 script {
-                    // Authenticate and pull the Docker image from Docker Hub
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
+                    docker.withRegistry(''https://registry.hub.docker.com/'', DOCKER_HUB_CREDENTIALS) {
                         docker.image(IMAGE_TAG).pull()
                     }
                 }
             }
         }
-        
+
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Run the Docker container from the pulled image
                     docker.image(IMAGE_TAG).run('-d -p 80:80')
                 }
             }
