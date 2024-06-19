@@ -5,7 +5,10 @@ pipeline {
         stage('Deploy Docker Image') {
             steps {
                 script {
-                    docker.image('my-docker-image:latest').run('-d -p 80:80')
+                    def instances = ['50.19.149.58', '54.92.163.41'] // list of instance IDs
+                    for (instance in instances) {
+                        docker.image('my-docker-image:latest').run("-d -p 80:80 --name ${instance}")
+                    }
                 }
             }
         }
