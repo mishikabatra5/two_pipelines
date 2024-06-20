@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'a782c2bc-47ea-4929-b865-3e8488b8e134'
-// Replace with your DockerHub credentials ID
+        DOCKERHUB_CREDENTIALS = 'a782c2bc-47ea-4929-b865-3e8488b8e134' // Replace with your DockerHub credentials ID
         IMAGE_NAME = 'mishikabatra/pipeline:latest'
         EC2_INSTANCE_IP = '3.90.239.108'
     }
@@ -53,8 +52,11 @@ pipeline {
             echo 'Deployment failed!'
         }
 
-        unstable {
-            echo 'Deployment unstable!'
+        always {
+            // Clean up Docker images after deployment
+            script {
+                docker.image(IMAGE_NAME).remove()
+            }
         }
     }
 }
