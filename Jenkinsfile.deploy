@@ -8,10 +8,12 @@ pipeline {
             steps {
                 sshagent(['4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@3.90.239.108 << 'EOF'
-                    docker pull mishikabatra/pipeline
-                    docker run -d -p 9091:80 mishikabatra/pipeline
-                  << EOF
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@3.90.239.108 << EOF
+                    docker pull mishikabatra/pipeline:latest
+                    docker stop pipeline-container || true
+                    docker rm pipeline-container || true
+                    docker run -d -p 9091:80 --name pipeline-container mishikabatra/pipeline:latest
+                    EOF
                     '''
                 }
             }
