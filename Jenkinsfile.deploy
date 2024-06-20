@@ -1,61 +1,19 @@
 pipeline {
     agent any
-
     environment {
-        DOCKERHUB_CREDENTIALS = 'a782c2bc-47ea-4929-b865-3e8488b8e134' // Replace with your DockerHub credentials ID
-        IMAGE_NAME = 'mishikabatra/pipeline:latest'
-        EC2_INSTANCE_IP = '3.90.239.108'
+        SSH_KEY = credentials('4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce')
     }
-
     stages {
-        stage('Build Docker Image') {
+        stage('Deploy') {
             steps {
-                script {
-                    docker.build(IMAGE_NAME, '-f Dockerfile .') // Build Docker image
+                sshagent(['4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@3.90.239.108 << 'EOF'
+                    docker pull manishchauhan27/my-docker-image
+                    docker run -d -p 9091:80 mishikabatra/pipeline
+                  << EOF
+                    '''
                 }
-            }
-        }
-
-        stage('Push Docker Image to Docker Hub') {
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
-                        docker.image(IMAGE_NAME).push() // Push Docker image to Docker Hub
-                    }
-                }
-            }
-        }
-
-        stage('Deploy Docker Image to EC2 Instance') {
-            steps {
-                script {
-                    try {
-                        sshagent(['4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce']) {
-                            // Execute SSH commands on EC2 instance
-                            sh "ssh ubuntu@${EC2_INSTANCE_IP} 'docker pull ${IMAGE_NAME} && docker run -d -p 9091:80 ${IMAGE_NAME}'"
-                        }
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Deployment successful!'
-        }
-
-        failure {
-            echo 'Deployment failed!'
-        }
-
-        always {
-            // Clean up Docker images after deployment
-            script {
-                docker.image(IMAGE_NAME).remove()
             }
         }
     }
