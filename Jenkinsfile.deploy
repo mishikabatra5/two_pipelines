@@ -2,40 +2,34 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_TAG = "mishikabatra/pipeline:latest"
-        EC2_INSTANCE = "ubuntu@3.90.239.108" // Replace with your EC2 instance SSH username and IP
-        SSH_CREDENTIALS_ID = '4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce	' // Replace with your SSH credentials ID in Jenkins
+        DOCKERHUB_CREDENTIALS = 'a782c2bc-47ea-4929-b865-3e8488b8e134' // Replace with your DockerHub credentials ID
+        IMAGE_NAME = 'mishikabatra/pipeline:latest'
     }
 
     stages {
-        stage('Pull Docker Image from Docker Hub') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Pull the Docker image from Docker Hub
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        docker.image(IMAGE_TAG).pull()
+                    docker.build(IMAGE_NAME, '-f Dockerfile .')
+                }
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
+                        docker.image(IMAGE_NAME).push()
                     }
                 }
             }
         }
 
-        stage('Push Docker Image to EC2 Instance') {
+        stage('Deploy Docker Image to EC2 Instance') {
             steps {
                 script {
-                    // Use SSH key credentials to copy the Docker image to EC2 instance
-                    sshagent(credentials: [SSH_CREDENTIALS_ID]) {
-                        sh "scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/path/to/your/image.tar.gz ${EC2_INSTANCE}:~/"
-                    }
-                }
-            }
-        }
-
-        stage('SSH into EC2 Instance and Deploy') {
-            steps {
-                script {
-                    sshagent(credentials: [SSH_CREDENTIALS_ID]) {
-                        // SSH into EC2 instance and deploy the Docker image
-                        sh "ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} 'docker load -i ~/image.tar.gz && docker run -d -p 9091:80 mishikabatra/pipeline:latest'"
+                    sshagent(credentials: ['4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce']) {
+                        sh "ssh ubuntu@your-3.90.239.108 'docker pull ${IMAGE_NAME} && docker run -d -p 9091:80 ${IMAGE_NAME}'"
                     }
                 }
             }
