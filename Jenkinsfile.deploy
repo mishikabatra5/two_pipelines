@@ -2,15 +2,17 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'a782c2bc-47ea-4929-b865-3e8488b8e134' // Replace with your DockerHub credentials ID
+        DOCKERHUB_CREDENTIALS = 'a782c2bc-47ea-4929-b865-3e8488b8e134'
+// Replace with your DockerHub credentials ID
         IMAGE_NAME = 'mishikabatra/pipeline:latest'
+        EC2_INSTANCE_IP = '3.90.239.108'
     }
 
     stages {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build(IMAGE_NAME, '-f Dockerfile .')
+                    docker.build(IMAGE_NAME, '-f Dockerfile .') // Build Docker image
                 }
             }
         }
@@ -19,7 +21,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
-                        docker.image(IMAGE_NAME).push()
+                        docker.image(IMAGE_NAME).push() // Push Docker image to Docker Hub
                     }
                 }
             }
@@ -28,11 +30,31 @@ pipeline {
         stage('Deploy Docker Image to EC2 Instance') {
             steps {
                 script {
-                    sshagent('4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce') {
-                        sh "ssh ubuntu@your-3.90.239.108 'docker pull ${IMAGE_NAME} && docker run -d -p 9091:80 ${IMAGE_NAME}'"
+                    try {
+                        sshagent(['4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce']) {
+                            // Execute SSH commands on EC2 instance
+                            sh "ssh ubuntu@${EC2_INSTANCE_IP} 'docker pull ${IMAGE_NAME} && docker run -d -p 9091:80 ${IMAGE_NAME}'"
+                        }
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        throw e
                     }
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment successful!'
+        }
+
+        failure {
+            echo 'Deployment failed!'
+        }
+
+        unstable {
+            echo 'Deployment unstable!'
         }
     }
 }
