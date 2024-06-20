@@ -28,7 +28,7 @@ pipeline {
         stage('Deploy Docker Image to EC2 Instance') {
             steps {
                 script {
-                    sshagent(credentials: ['4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce']) {
+                    sshagent('4503d1cc-c57e-4cf5-9b55-f2c5d133d2ce') {
                         sh "ssh ubuntu@your-3.90.239.108 'docker pull ${IMAGE_NAME} && docker run -d -p 9091:80 ${IMAGE_NAME}'"
                     }
                 }
