@@ -30,7 +30,7 @@ pipeline {
                 script {
                     try {
                         echo "Running Docker container from image ${IMAGE_TAG}"
-                        docker.image(IMAGE_TAG).run('-d -p 9090:80')
+                        docker.image(IMAGE_TAG).run('-d -p 9091:80')
                         echo "Docker container running successfully"
                     } catch (Exception e) {
                         echo "Failed to run Docker container: ${e.getMessage()}"
