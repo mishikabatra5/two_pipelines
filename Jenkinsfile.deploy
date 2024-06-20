@@ -10,8 +10,16 @@ pipeline {
         stage('Pull Docker Image from Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry(''https://registry.hub.docker.com/'', DOCKER_HUB_CREDENTIALS) {
-                        docker.image(IMAGE_TAG).pull()
+                    try {
+                        echo "Pulling Docker image ${IMAGE_TAG} from Docker Hub"
+                        docker.withRegistry('https://registry.hub.docker.com/', DOCKER_HUB_CREDENTIALS) {
+                            docker.image(IMAGE_TAG).pull()
+                        }
+                        echo "Docker image ${IMAGE_TAG} pulled successfully"
+                    } catch (Exception e) {
+                        echo "Failed to pull Docker image: ${e.getMessage()}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
                     }
                 }
             }
@@ -20,9 +28,26 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    docker.image(IMAGE_TAG).run('-d -p 80:80')
+                    try {
+                        echo "Running Docker container from image ${IMAGE_TAG}"
+                        docker.image(IMAGE_TAG).run('-d -p 80:80')
+                        echo "Docker container running successfully"
+                    } catch (Exception e) {
+                        echo "Failed to run Docker container: ${e.getMessage()}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment completed successfully."
+        }
+        failure {
+            echo "Deployment failed."
         }
     }
 }
